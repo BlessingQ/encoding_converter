@@ -1,0 +1,4 @@
+# 선택 사항 - 설치 시 인코딩 감지 정확도 향상
+# pip install chardet
+chardet>=5.0
+tkinterdnd2>=0.4

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ENC Converter Icon Preview</title>
+  <style>
+    :root {
+      --bg: #e2e8f0;
+      --card: rgba(255,255,255,0.82);
+      --text: #0f172a;
+      --sub: #475569;
+      --border: rgba(148,163,184,0.35);
+      --shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #bfdbfe, transparent 28%),
+        radial-gradient(circle at bottom right, #99f6e4, transparent 22%),
+        linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      min-height: 100vh;
+      padding: 40px 24px 64px;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+    p {
+      margin: 0 0 28px;
+      color: var(--sub);
+      font-size: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .frame {
+      display: grid;
+      place-items: center;
+      border-radius: 22px;
+      min-height: 296px;
+      padding: 18px;
+      margin-bottom: 16px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+    }
+    .frame.dark {
+      background:
+        radial-gradient(circle at top, rgba(56,189,248,0.22), transparent 40%),
+        linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    }
+    .sizes {
+      display: flex;
+      gap: 14px;
+      align-items: end;
+      padding-top: 8px;
+    }
+    .sizes img {
+      border-radius: 18%;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.16);
+    }
+    h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+    .meta {
+      font-size: 14px;
+      color: var(--sub);
+      min-height: 42px;
+    }
+    code {
+      background: rgba(148,163,184,0.15);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ENC Converter 아이콘 시안</h1>
+    <p>가장 추천하는 방향은 A입니다. 문서 + 코드 + 변환 화살표 조합이라 앱 용도가 가장 직관적으로 보입니다.</p>
+
+    <div class="grid">
+      <section class="card">
+        <div class="frame">
+          <img src="icon-concept-a.svg" alt="Concept A" width="220" height="220">
+        </div>
+        <h2>Concept A</h2>
+        <div class="meta">문서 중심형. 코드 파일을 UTF-8로 정리하는 앱이라는 메시지가 가장 직접적입니다.</div>
+        <div class="sizes">
+          <img src="icon-concept-a.svg" alt="" width="96" height="96">
+          <img src="icon-concept-a.svg" alt="" width="64" height="64">
+          <img src="icon-concept-a.svg" alt="" width="32" height="32">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="frame dark">
+          <img src="icon-concept-b.svg" alt="Concept B" width="220" height="220">
+        </div>
+        <h2>Concept B</h2>
+        <div class="meta">변환 과정 강조형. 결과 문서 쪽에 UTF-8 배지를 직접 넣어 인코딩 변환 앱임을 더 분명하게 보이게 했습니다.</div>
+        <div class="sizes">
+          <img src="icon-concept-b.svg" alt="" width="96" height="96">
+          <img src="icon-concept-b.svg" alt="" width="64" height="64">
+          <img src="icon-concept-b.svg" alt="" width="32" height="32">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="frame">
+          <img src="icon-concept-c.svg" alt="Concept C" width="220" height="220">
+        </div>
+        <h2>Concept C</h2>
+        <div class="meta">기술 유틸리티형. 변환 엔진이나 인코딩 코어 같은 인상을 주는 좀 더 도구적인 방향입니다.</div>
+        <div class="sizes">
+          <img src="icon-concept-c.svg" alt="" width="96" height="96">
+          <img src="icon-concept-c.svg" alt="" width="64" height="64">
+          <img src="icon-concept-c.svg" alt="" width="32" height="32">
+        </div>
+      </section>
+    </div>
+
+    <p style="margin-top: 24px;">파일 위치: <code>assets/icon-concept-a.svg</code>, <code>assets/icon-concept-b.svg</code>, <code>assets/icon-concept-c.svg</code></p>
+  </div>
+</body>
+</html>
