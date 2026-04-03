@@ -10,8 +10,8 @@ ARGS=(
   --clean
   --windowed
   --onedir
-  --name ENCConverter
-  --osx-bundle-identifier com.encconverter.app
+  --name "Encoding Converter"
+  --osx-bundle-identifier com.encodingconverter.app
   --collect-all tkinterdnd2
   gui.py
 )
@@ -24,4 +24,4 @@ python3 "${ARGS[@]}"
 
 echo
 echo "Build complete:"
-echo "  dist/ENCConverter.app"
+echo "  dist/Encoding Converter.app"

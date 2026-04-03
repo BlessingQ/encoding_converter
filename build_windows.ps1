@@ -32,7 +32,7 @@ $args = @(
     "--clean",
     "--windowed",
     "--onefile",
-    "--name", "ENCConverter",
+    "--name", "Encoding Converter",
     "--collect-all", "tkinterdnd2",
     "gui.py"
 )
@@ -49,4 +49,4 @@ if (Test-Path $iconPngPath) {
 
 Write-Host ""
 Write-Host "Build complete:"
-Write-Host "  dist/ENCConverter.exe"
+Write-Host "  dist/Encoding Converter.exe"

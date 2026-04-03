@@ -15,6 +15,8 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
+from app_version import APP_NAME, APP_VERSION, APP_AUTHOR, APP_EMAIL
+
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
     DND_AVAILABLE = True
@@ -71,6 +73,14 @@ def resource_path(*parts: str) -> Path:
     """
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
     return base.joinpath(*parts)
+
+
+def build_backup_path(path: Path, backup_stamp: str) -> Path:
+    """
+    원본 파일과 같은 폴더에 백업 파일 경로를 만든다.
+    예: main.c -> main_backup_20260403_091500.c
+    """
+    return path.with_name(f"{path.stem}_backup_{backup_stamp}{path.suffix}")
 
 
 def enable_high_dpi():
@@ -175,7 +185,7 @@ class FileItem:
     def arrow(self):
         return f"{self.enc_label} → UTF-8" if self.status == self.STATUS_CONVERT else self.enc_label
 
-    def convert(self, backup_dir: Path | None):
+    def convert(self, backup_stamp: str | None):
         if self.status not in (self.STATUS_CONVERT,):
             return
         try:
@@ -184,11 +194,9 @@ class FileItem:
             self.status = self.STATUS_FAILED
             self.error_msg = str(e)
             return
-        if backup_dir:
+        if backup_stamp:
             try:
-                rel = self.path.relative_to(self.path.anchor)
-                dest = backup_dir / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest = build_backup_path(self.path, backup_stamp)
                 shutil.copy2(self.path, dest)
             except Exception:
                 pass
@@ -245,7 +253,7 @@ class App:
 
     # ── 윈도우 기본 설정
     def _setup_window(self):
-        self.root.title("ENC Converter  ·  C/H 파일 인코딩 변환기")
+        self.root.title(f"{APP_NAME}  ·  C/H 파일 인코딩 변환기")
         self._set_initial_geometry()
         self.root.configure(bg=C["bg"])
         self._icon_image = None
@@ -319,15 +327,41 @@ class App:
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
 
+        info_btn = tk.Button(
+            hdr,
+            text="ⓘ",
+            command=self._show_about_info,
+            font=("Segoe UI Symbol", 15, "bold"),
+            bg="#16324D",
+            fg="#BFDBFE",
+            activebackground="#21405F",
+            activeforeground="#E2E8F0",
+            relief="flat",
+            bd=0,
+            padx=10,
+            pady=4,
+            cursor="hand2",
+        )
+        info_btn.pack(side="right", padx=(12, 16), pady=10)
+
         icon = tk.Label(hdr, text="⟳", font=("Segoe UI", 22, "bold"),
                         bg=C["header_bg"], fg="#60A5FA")
         icon.pack(side="left", padx=(18, 6), pady=8)
 
-        tk.Label(hdr, text="ENC Converter", font=FONT_H1,
+        tk.Label(hdr, text=APP_NAME, font=FONT_H1,
                  bg=C["header_bg"], fg=C["header_fg"]).pack(side="left", pady=8)
         tk.Label(hdr, text="C / H 파일 인코딩 감지 · UTF-8 변환",
                  font=FONT_CAPTION, bg=C["header_bg"],
                  fg="#94A3B8").pack(side="left", padx=(10, 0), pady=8)
+
+    def _show_about_info(self):
+        messagebox.showinfo(
+            "정보",
+            f"{APP_NAME}\n\n"
+            f"버전: v{APP_VERSION}\n"
+            f"작성자: {APP_AUTHOR}\n"
+            f"이메일: {APP_EMAIL}",
+        )
 
     # ── 드롭 존
     def _build_drop_zone(self, parent):
@@ -662,12 +696,11 @@ class App:
             messagebox.showinfo("알림", "변환할 파일이 없습니다.")
             return
 
-        backup_dir = None
+        backup_stamp = None
+        backup_example = None
         if self.var_backup.get():
-            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            first = targets[0].path
-            base = first.parent
-            backup_dir = base.parent / f"{base.name}_backup_{ts}"
+            backup_stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_example = build_backup_path(targets[0].path, backup_stamp)
 
         self.convert_btn.config(state="disabled", text="변환 중…")
         self.progress["maximum"] = len(targets)
@@ -675,16 +708,16 @@ class App:
 
         def worker():
             for idx, item in enumerate(targets):
-                item.convert(backup_dir)
+                item.convert(backup_stamp)
                 self.root.after(0, lambda i=idx: (
                     self._refresh_list(),
                     self.progress.config(value=i + 1)
                 ))
-            self.root.after(0, self._on_convert_done, backup_dir)
+            self.root.after(0, self._on_convert_done, backup_stamp, backup_example)
 
         threading.Thread(target=worker, daemon=True).start()
 
-    def _on_convert_done(self, backup_dir):
+    def _on_convert_done(self, backup_stamp, backup_example):
         self.convert_btn.config(state="normal", text="⟳   UTF-8 로 변환")
         self._refresh_list()
 
@@ -694,8 +727,12 @@ class App:
         msg = f"변환 완료: {done}개"
         if failed:
             msg += f"\n실패: {failed}개"
-        if backup_dir:
-            msg += f"\n\n백업 위치:\n{backup_dir}"
+        if backup_stamp and backup_example:
+            msg += (
+                "\n\n백업 방식:\n"
+                "원본 파일과 같은 폴더에 백업 파일 생성\n"
+                f"예시:\n{backup_example}"
+            )
         messagebox.showinfo("변환 완료", msg)
 
 

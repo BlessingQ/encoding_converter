@@ -50,7 +50,7 @@ pip install -r requirements-build.txt
 
 출력:
 
-- `dist/ENCConverter.exe`
+- `dist/Encoding Converter.exe`
 
 설명:
 
@@ -67,7 +67,7 @@ chmod +x build_macos.sh
 
 출력:
 
-- `dist/ENCConverter.app`
+- `dist/Encoding Converter.app`
 
 설명:
 

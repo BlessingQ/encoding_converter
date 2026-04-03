@@ -12,6 +12,8 @@ import argparse
 import datetime
 from pathlib import Path
 
+from app_version import APP_VERSION
+
 
 # ─────────────────────────────────────────────
 #  인코딩 감지
@@ -81,7 +83,21 @@ class ConvertResult:
         self.failed    = []   # (path, error)
 
 
-def process_file(path: Path, backup_dir: Path, dry_run: bool, result: ConvertResult):
+def build_backup_path(path: Path, backup_stamp: str, backup_dir: Path | None = None) -> Path:
+    """
+    기본은 원본 파일과 같은 폴더에 백업 파일 생성.
+    backup_dir 가 지정된 경우에만 해당 폴더 구조로 백업.
+    """
+    if backup_dir:
+        rel = path.relative_to(path.anchor)
+        dest = backup_dir / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        return dest
+    return path.with_name(f"{path.stem}_backup_{backup_stamp}{path.suffix}")
+
+
+def process_file(path: Path, backup_stamp: str | None, backup_dir: Path | None,
+                 dry_run: bool, result: ConvertResult):
     """
     단일 파일을 UTF-8로 변환.
     """
@@ -110,10 +126,8 @@ def process_file(path: Path, backup_dir: Path, dry_run: bool, result: ConvertRes
         return
 
     # 백업
-    if backup_dir:
-        rel = path.relative_to(path.anchor)  # 드라이브 제거
-        dest = backup_dir / rel
-        dest.parent.mkdir(parents=True, exist_ok=True)
+    if backup_stamp:
+        dest = build_backup_path(path, backup_stamp, backup_dir)
         shutil.copy2(path, dest)
 
     # UTF-8 저장 (BOM 없음, 줄바꿈 원본 유지)
@@ -156,12 +170,13 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 예시:
-  python convert.py .                          현재 폴더 (비재귀)
-  python convert.py ../EMD-1010_Origin -r      하위 폴더 포함
-  python convert.py EMD1010.c --dry-run        미리보기만
-  python convert.py . -r --ext .c .h .cpp      확장자 지정
+  python3 convert.py .                         현재 폴더 (비재귀)
+  python3 convert.py ../EMD-1010_Origin -r     하위 폴더 포함
+  python3 convert.py EMD1010.c --dry-run       미리보기만
+  python3 convert.py . -r --ext .c .h .cpp     확장자 지정
         """,
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {APP_VERSION}")
     parser.add_argument("path", help="변환할 파일 또는 폴더 경로")
     parser.add_argument("-r", "--recursive",  action="store_true", help="하위 폴더 재귀 탐색")
     parser.add_argument("--dry-run",          action="store_true", help="실제 변환 없이 결과만 미리보기")
@@ -169,7 +184,7 @@ def main():
                         help="대상 확장자 (기본: .c .h)")
     parser.add_argument("--no-backup",        action="store_true", help="백업 생성 안 함")
     parser.add_argument("--backup-dir",       default=None, metavar="DIR",
-                        help="백업 폴더 지정 (기본: <path>_backup_YYYYMMDD_HHMMSS)")
+                        help="백업 폴더 지정 (미지정 시 원본 파일과 같은 폴더에 *_backup_YYYYMMDD_HHMMSS.ext 생성)")
 
     args = parser.parse_args()
 
@@ -179,14 +194,14 @@ def main():
         sys.exit(1)
 
     # 백업 폴더 결정
+    backup_stamp = None
+    backup_dir = None
     if args.no_backup or args.dry_run:
         backup_dir = None
-    elif args.backup_dir:
-        backup_dir = Path(args.backup_dir).resolve()
     else:
-        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        base = root if root.is_dir() else root.parent
-        backup_dir = base.parent / f"{base.name}_backup_{ts}"
+        backup_stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    if args.backup_dir and backup_stamp:
+        backup_dir = Path(args.backup_dir).resolve()
 
     # 파일 수집
     extensions = [e if e.startswith(".") else f".{e}" for e in args.ext]
@@ -201,13 +216,19 @@ def main():
     cprint(CYAN, f"\n{mode_label} 대상: {root}")
     cprint(CYAN, f"  파일 수   : {len(files)}")
     cprint(CYAN, f"  확장자    : {extensions}")
-    cprint(CYAN, f"  백업 폴더 : {backup_dir if backup_dir else '사용 안 함'}")
+    if backup_stamp:
+        if backup_dir:
+            cprint(CYAN, f"  백업 위치 : {backup_dir}")
+        else:
+            cprint(CYAN, f"  백업 위치 : 원본 파일과 같은 폴더 (*_backup_{backup_stamp}.ext)")
+    else:
+        cprint(CYAN, "  백업 위치 : 사용 안 함")
     print()
 
     # 처리
     result = ConvertResult()
     for fpath in files:
-        process_file(fpath, backup_dir, args.dry_run, result)
+        process_file(fpath, backup_stamp, backup_dir, args.dry_run, result)
 
     # 결과 출력
     for fpath, from_enc in result.converted:
@@ -223,8 +244,11 @@ def main():
     # 요약
     print()
     cprint(CYAN, f"완료: 변환 {len(result.converted)} / 스킵 {len(result.skipped)} / 오류 {len(result.failed)}")
-    if not args.dry_run and backup_dir and result.converted:
-        cprint(CYAN, f"백업 위치: {backup_dir}")
+    if not args.dry_run and backup_stamp and result.converted:
+        if backup_dir:
+            cprint(CYAN, f"백업 위치: {backup_dir}")
+        else:
+            cprint(CYAN, f"백업 위치: 원본 파일과 같은 폴더 (*_backup_{backup_stamp}.ext)")
 
 
 if __name__ == "__main__":

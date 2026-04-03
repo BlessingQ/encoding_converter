@@ -1,4 +1,4 @@
-# ENC Converter
+# Encoding Converter
 
 C / H / CPP / HPP 파일의 인코딩을 감지해서 UTF-8로 변환하는 `tkinter` 기반 GUI 도구입니다.
 
@@ -90,7 +90,7 @@ Windows에서는 아래 스크립트를 실행하면 됩니다.
 
 출력 결과:
 
-- `dist/ENCConverter.exe`
+- `dist/Encoding Converter.exe`
 
 이 스크립트는 내부적으로 다음 옵션을 사용합니다.
 
@@ -109,7 +109,7 @@ chmod +x build_macos.sh
 
 출력 결과:
 
-- `dist/ENCConverter.app`
+- `dist/Encoding Converter.app`
 
 참고:
 
